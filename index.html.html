@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pocket Money Tracker</title>
+    <style>
+        /* CSS Variables for Easy Theme Switching */
+        :root {
+            --bg-color: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-muted: #7f8c8d;
+            --primary: #2ecc71;
+            --primary-hover: #27ae60;
+            --edit-color: #f39c12;
+            --edit-hover: #d35400;
+            --danger: #e74c3c;
+            --danger-hover: #c0392b;
+            --border: #e2e8f0;
+            --shadow: rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #f5f6fa;
+            --text-muted: #a0aec0;
+            --border: #2d3748;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .tracker-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .theme-btn {
+            background: none;
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .theme-btn:hover {
+            background-color: var(--border);
+        }
+
+        /* Balance Display */
+        .balance-card {
+            background: linear-gradient(135deg, #3498db, #2bc48a);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .balance-card p {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        .balance-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .balance-card h2 {
+            font-size: 2.2rem;
+        }
+
+        .edit-balance-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .edit-balance-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .balance-edit-group {
+            display: none;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .balance-edit-group input {
+            width: 120px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            background: white;
+        }
+
+        .balance-edit-group button {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .balance-edit-group button:hover {
+            background-color: #1a252f;
+        }
+
+        /* Form Styles */
+        .task-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input[type="text"] {
+            flex: 2;
+        }
+
+        input[type="number"] {
+            flex: 1;
+        }
+
+        input:focus {
+            border-color: #3498db;
+        }
+
+        .submit-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #2980b9;
+        }
+
+        /* Task List Styles */
+        .task-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .task-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .task-title {
+            font-weight: 600;
+        }
+
+        .task-reward {
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            border: none;
+            background: none;
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-complete { background-color: rgba(46, 204, 113, 0.1); color: var(--primary); }
+        .btn-complete:hover { background-color: var(--primary); color: white; }
+
+        .btn-edit { background-color: rgba(243, 156, 18, 0.1); color: var(--edit-color); }
+        .btn-edit:hover { background-color: var(--edit-color); color: white; }
+
+        .btn-delete { background-color: rgba(231, 76, 60, 0.1); color: var(--danger); }
+        .btn-delete:hover { background-color: var(--danger); color: white; }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tracker-container">
+        <div class="header">
+            <h1>Pocket Money Tracker 🪙</h1>
+            <button class="theme-btn" id="themeToggle" onclick="toggleTheme()">
+                <span id="themeIcon">🌙</span> Dark Mode
+            </button>
+        </div>
+
+        <div class="balance-card">
+            <p>Total Balance 💰</p>
+            <div class="balance-container">
+                <h2 id="totalBalance">$0.00</h2>
+                <button class="edit-balance-btn" title="Adjust Balance" onclick="toggleBalanceEdit()">✏️</button>
+            </div>
+            <div class="balance-edit-group" id="balanceEditGroup">
+                <input type="number" id="customBalanceInput" placeholder="New Balance" step="0.01" min="0">
+                <button onclick="saveCustomBalance()">Save</button>
+            </div>
+        </div>
+
+        <form class="task-form" id="taskForm" onsubmit="handleFormSubmit(event)">
+            <div class="input-group">
+                <input type="text" id="taskName" placeholder="e.g., Clean the garage 🧹" required>
+                <input type="number" id="taskReward" placeholder="Reward $" step="0.01" min="0" required>
+            </div>
+            <button type="submit" class="submit-btn" id="formSubmitBtn">Add Task ➕</button>
+        </form>
+
+        <h3>Chore List 📝</h3>
+        <ul class="task-list" id="taskList">
+            </ul>
+        <div id="emptyState" class="empty-state">No tasks left! Time to relax or add more. 😎</div>
+    </div>
+
+    <script>
+        // App State
+        let tasks = JSON.parse(localStorage.getItem('pocketTasks')) || [];
+        let balance = parseFloat(localStorage.getItem('pocketBalance')) || 0.00;
+        let editTaskId = null;
+
+        // Elements
+        const taskListEl = document.getElementById('taskList');
+        const emptyStateEl = document.getElementById('emptyState');
+        const totalBalanceEl = document.getElementById('totalBalance');
+        const taskNameInput = document.getElementById('taskName');
+        const taskRewardInput = document.getElementById('taskReward');
+        const formSubmitBtn = document.getElementById('formSubmitBtn');
+        const balanceEditGroup = document.getElementById('balanceEditGroup');
+        const customBalanceInput = document.getElementById('customBalanceInput');
+
+        // Initial render
+        updateUI();
+
+        // Add or Update Task
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const name = taskNameInput.value.trim();
+            const reward = parseFloat(taskRewardInput.value);
+
+            if (!name || isNaN(reward)) return;
+
+            if (editTaskId !== null) {
+                // Edit Mode
+                tasks = tasks.map(task => task.id === editTaskId ? { ...task, name, reward } : task);
+                editTaskId = null;
+                formSubmitBtn.innerText = 'Add Task ➕';
+                formSubmitBtn.style.backgroundColor = '#3498db';
+            } else {
+                // Add Mode
+                const newTask = {
+                    id: Date.now(),
+                    name: name,
+                    reward: reward
+                };
+                tasks.push(newTask);
+            }
+
+            saveAndRender();
+            e.target.reset();
+        }
+
+        // Complete Task (Claim Reward)
+        function completeTask(id, reward) {
+            balance += reward;
+            deleteTask(id); // Completing removes it from the to-do list
+        }
+
+        // Setup Edit Task Mode
+        function editTask(id) {
+            const taskToEdit = tasks.find(task => task.id === id);
+            if (!taskToEdit) return;
+
+            taskNameInput.value = taskToEdit.name;
+            taskRewardInput.value = taskToEdit.reward;
+            editTaskId = id;
+
+            formSubmitBtn.innerText = 'Update Task 💾';
+            formSubmitBtn.style.backgroundColor = 'var(--edit-color)';
+            taskNameInput.focus();
+        }
+
+        // Delete Task
+        function deleteTask(id) {
+            if(editTaskId === id) {
+                editTaskId = null;
+                formSubmitBtn.innerText = 'Add Task ➕';
+                formSubmitBtn.style.backgroundColor = '#3498db';
+                document.getElementById('taskForm').reset();
+            }
+            
+            tasks = tasks.filter(task => task.id !== id);
+            saveAndRender();
+        }
+
+        // Show/Hide Manual Balance Overwrite
+        function toggleBalanceEdit() {
+            if (balanceEditGroup.style.display === 'flex') {
+                balanceEditGroup.style.display = 'none';
+            } else {
+                balanceEditGroup.style.display = 'flex';
+                customBalanceInput.value = balance.toFixed(2);
+                customBalanceInput.focus();
+            }
+        }
+
+        // Save Manually Typed Balance
+        function saveCustomBalance() {
+            const newValue = parseFloat(customBalanceInput.value);
+            if (!isNaN(newValue) && newValue >= 0) {
+                balance = newValue;
+                balanceEditGroup.style.display = 'none';
+                saveAndRender();
+            }
+        }
+
+        // Save state and Refresh view
+        function saveAndRender() {
+            localStorage.setItem('pocketTasks', JSON.stringify(tasks));
+            localStorage.setItem('pocketBalance', balance.toFixed(2));
+            updateUI();
+        }
+
+        // Render everything to screen
+        function updateUI() {
+            // Update Balance Display
+            totalBalanceEl.innerText = `$${balance.toFixed(2)}`;
+
+            // Clear dynamic items
+            taskListEl.innerHTML = '';
+
+            // Toggle empty list messaging
+            if (tasks.length === 0) {
+                emptyStateEl.style.display = 'block';
+            } else {
+                emptyStateEl.style.display = 'none';
+                
+                tasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.className = 'task-item';
+                    li.innerHTML = `
+                        <div class="task-info">
+                            <span class="task-title">${task.name}</span>
+                            <span class="task-reward">+$${task.reward.toFixed(2)}</span>
+                        </div>
+                        <div class="task-actions">
+                            <button class="action-btn btn-complete" title="Complete Chore" onclick="completeTask(${task.id}, ${task.reward})">✅</button>
+                            <button class="action-btn btn-edit" title="Edit Chore" onclick="editTask(${task.id})">✏️</button>
+                            <button class="action-btn btn-delete" title="Delete Chore" onclick="deleteTask(${task.id})">❌</button>
+                        </div>
+                    `;
+                    taskListEl.appendChild(li);
+                });
+            }
+        }
+
+        // Dark Mode Functionality
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const targetTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', targetTheme);
+            localStorage.setItem('pocketTheme', targetTheme);
+            
+            const themeBtn = document.getElementById('themeToggle');
+            if (targetTheme === 'dark') {
+                themeBtn.innerHTML = `<span id="themeIcon">☀️</span> Light Mode`;
+            } else {
+                themeBtn.innerHTML = `<span id="themeIcon">🌙</span> Dark Mode`;
+            }
+        }
+
+        // Apply saved preference on load
+        window.onload = () => {
+            const savedTheme = localStorage.getItem('pocketTheme');
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('themeToggle').innerHTML = `<span id="themeIcon">☀️</span> Light Mode`;
+            }
+        };
+    </script>
+</body>
+</html>
